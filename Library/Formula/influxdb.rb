@@ -17,6 +17,8 @@ class Influxdb < Formula
   depends_on "flex" => :build
   depends_on "go" => :build
 
+  patch :DATA
+
   def install
     ENV["GOPATH"] = buildpath
 
@@ -78,3 +80,24 @@ class Influxdb < Formula
     system "#{bin}/influxdb", "-v"
   end
 end
+
+__END__
+diff --git a/Makefile.in b/Makefile.in
+index 63744f9..9894d39 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -4,7 +4,12 @@ PROTOC = @PROTOC@
+ GO     = @GO@
+ GOROOT = @GOROOT@
+ # or 386, arm
+-arch   = amd64
++# Automatically set the local architecture
++uname_M = $(shell sh -c "uname -m 2>/dev/null || echo not")
++ifeq ($(uname_M),i386)
++       arch   = 386
++else
++       arch   = amd64
++endif
+ CGO_ENABLED = 1
+
+ ifneq ($(GOROOT),)
